@@ -1,0 +1,6 @@
+# vim: ft=coffee :
+[
+{
+	data: './foo.png'
+}
+]

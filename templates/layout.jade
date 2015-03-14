@@ -1,0 +1,20 @@
+doctype html
+html
+  head
+    title Image tagger
+    script(src='app.js')
+    link(rel='stylesheet', href='/vendor/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/vendor/bootstrap/css/bootstrap-theme.min.css')
+    link(rel='stylesheet', href='/css/style.css')
+    block head
+    //- script(src='/vendor/bootstrap/js/bootstrap.js')
+  body
+      nav.navbar.navbar-inverse.navbar-fixed-top
+          .container
+              .navbar-header
+                  button.navbar-toggle.collapsed(type="button", data-toggle="collapse", data-target="#navbar")
+                  a.navbar-brand(href="#") Tagger
+              block navbar
+      .page-header
+      .container-fluid#content
+          block body

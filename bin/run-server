@@ -1,0 +1,25 @@
+#!/usr/bin/env coffee
+
+CSON = require 'cson'
+Async = require 'async'
+Fs = require 'fs'
+Path = require 'path'
+TaggingServer = require '../src/TaggingServer'
+
+taglist = CSON.load 'data/tags.cson'
+
+files = {}
+basedir = Path.resolve(process.env.TAGDIR or '.')
+for filename in Fs.readdirSync(basedir)
+	continue unless /(png|jpg|gif)$/.test(filename)
+	files[basedir + '/' + filename] = {"tags": ['foo']}
+
+filenames = Object.keys(files)
+for i in [0 ... filenames.length]
+	files[filenames[i]].prev = filenames[i - 1] || null
+	files[filenames[i]].next = filenames[i + 1] || null
+
+srv = new TaggingServer(files, taglist)
+srv.listen 3000
+
+# vim: ft=coffee :

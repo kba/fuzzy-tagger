@@ -1,0 +1,11 @@
+img {
+  max-height: 400px;
+}
+/* body { */
+/*   background-color: black; */
+/*   color: white; */
+/* } */
+input[type='text'] {
+  background-color: #222;
+  color: yellow;
+}
