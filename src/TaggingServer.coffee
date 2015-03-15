@@ -39,12 +39,12 @@ module.exports = class TaggingServer
 			res.send ret
 
 		@app.get '/api/file', (req, res, next) ->
-			self.db.find {}, (err, docs) ->
+			self.db.files.find {}, (err, docs) ->
 				res.send docs.map (el) -> el._id
 
 		@app.get /\/api\/file\/(.*)/, (req, res, next) ->
 			filename = req.params[0]
-			self.db.findOne {_id: filename}, (err, found) ->
+			self.db.files.findOne {_id: filename}, (err, found) ->
 				if err or not found
 					res.status 404
 					return next "No such file: #{filename}"
@@ -54,18 +54,18 @@ module.exports = class TaggingServer
 
 		@app.patch /\/api\/file\/(.*)/, (req, res, next) ->
 			filename = req.params[0]
-			self.db.findOne {_id: filename}, (err, found) ->
+			self.db.files.findOne {_id: filename}, (err, found) ->
 				if err or not found
 					res.status 404
 					return next "No such file: #{filename}"
 				patchset = req.body
 				console.log patchset
-				JsonPatch.apply(self.files[filename], patchset)
+				JsonPatch.apply(found, patchset)
 				for patch in patchset
 					if patch.op is 'add'
 						if patch.value not in self.taglist
 							self.taglist.push patch.value
-				self.db.update {_id: filename}, self.files[filename], (err, newDoc) ->
+				self.db.files.update {_id: filename}, self.files[filename], (err, newDoc) ->
 					console.log newDoc
 				res.status 204
 				res.end()

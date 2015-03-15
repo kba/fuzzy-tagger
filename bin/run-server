@@ -6,27 +6,53 @@ Fs = require 'fs'
 Path = require 'path'
 TaggingServer = require '../src/TaggingServer'
 Nedb = require 'nedb'
+program = require 'commander'
+program
+	.version('0.0.1')
+	.usage('[options] file...')
+	.option('-f, --filesdb [jsonfile]', 'JSON file to output files data')
+	.option('-t, --tagsdb [jsonfile]', 'JSON file to output tags data')
+	.option('-d, --dir [directory]', 'Directory to look for files')
+	.option('-i, --include [regex]', 'Regex to match for inclusion')
+	.parse(process.argv)
 
-taglist = CSON.load 'data/tags.cson'
+program.filesdb or= './files.db.json'
+program.tagsdb or= './tags.db.json'
 
-files = {}
-basedir = Path.resolve(process.env.TAGDIR or '.')
-for filename in Fs.readdirSync(basedir)
-	continue unless /(png|jpg|gif)$/.test(filename)
-	files[basedir + '/' + filename] = {"tags": ['foo']}
+program.dir or= process.env.TAGDIR
+program.dir or= '.'
 
-filenames = Object.keys(files)
-for i in [0 ... filenames.length]
-	files[filenames[i]].prev = filenames[i - 1] || null
-	files[filenames[i]].next = filenames[i + 1] || null
+program.include or= '(png|jpg|gif)$'
+program.include = new RegExp(program.include)
 
-db = new Nedb(filename: 'db.json')
-db.loadDatabase (err) ->
-	Async.each Object.keys(files), (filename, cb) ->
-		files[filename]._id = filename
-		db.insert files[filename], cb
+upsertFiles = (coll) ->
+	files = {}
+	basedir = Path.resolve(process.env.TAGDIR or '.')
+	Async.each Fs.readdirSync(basedir).map((el) -> basedir + '/' + el), (filename, cb) ->
+		return cb unless program.include.test(filename)
+		db.files.findOne {_id: filename}, (err, found) ->
+			if found 
+				cb()
+			else
+				db.insert {
+					_id: filename
+				}, (err) ->
+					cb()
+		}
 	, (err) ->
-		srv = new TaggingServer(files, taglist, db)
-		srv.listen 3000
+	# filenames = Object.keys(files)
+	# for i in [0 ... filenames.length]
+	#     files[filenames[i]].prev = filenames[i - 1] || null
+	#     files[filenames[i]].next = filenames[i + 1] || null
+
+db = {}
+db.tags = new Nedb(filename: process.tagsdb)
+db.files = new Nedb(filename: process.filesdb)
+Async.each Object.keys(db), (dbname, cb) ->
+	db[dbname].loadDatabase cb
+, (err) ->
+	return console.log err if err
+	srv = new TaggingServer(files, taglist, db)
+	srv.listen 3000
 
 # vim: ft=coffee :
