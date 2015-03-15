@@ -30,3 +30,4 @@ package.cson
 apidocs/
 lib/
 public/vendor
+db.json

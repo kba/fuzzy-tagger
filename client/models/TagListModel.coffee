@@ -5,6 +5,7 @@ module.exports = class TagListModel extends Backbone.Model
 	defaults : {
 		tags: []
 		filter: ''
+		exclude: []
 	}
 
 	fetch : () ->

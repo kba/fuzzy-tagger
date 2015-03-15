@@ -9,7 +9,7 @@
     "clean": "rm -r apidocs lib ; true",
     "prepublish": "npm run compile",
     "watch": "watchify client/app.coffee -o public/app.js -v --debug -t coffeeify --extension='.coffee'",
-    "serve": "nodemon --exec coffee bin/run-server src/* templates/*.jade",
+    "serve": "nodemon --exec coffee bin/run-server src/* client/templates/*.jade bin/*",
     "run": "npm run watch & npm run serve"
   },
   "repository": {
@@ -36,6 +36,7 @@
     "jquery-ui": "^1.10.5",
     "json-patch": "^0.5.0",
     "merge": "^1.2.0",
+    "nedb": "^1.1.1",
     "superagent": "^1.1.0",
     "watchify": "^2.4.0"
   },

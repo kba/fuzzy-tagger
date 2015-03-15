@@ -9,3 +9,9 @@ input[type='text'] {
   background-color: #222;
   color: yellow;
 }
+b {
+  color: red;
+}
+li.tag {
+  padding: 2px;
+}

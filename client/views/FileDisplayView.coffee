@@ -1,5 +1,5 @@
-Backbone = require 'backbone'
-module.exports = class FileDisplayView extends Backbone.View
+BaseView = require '../BaseView'
+module.exports = class FileDisplayView extends BaseView
 
 	constructor : (@el, @model) ->
 

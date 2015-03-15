@@ -17,11 +17,11 @@ class TagAppRouter extends Backbone.Router
 $ ->
 	appRouter = new TagAppRouter()
 	appRouter.on 'route:file', (filename) ->
-		console.log filename
 		appView = new FileView($("#main"), filename)
+		appView.render()
 	appRouter.on 'route:defaultRoute', (actions) ->
 		Request
 			.get('/api/file')
 			.end (err, res) ->
-				appRouter.navigate "tag#{res.body[0]}"
+				appRouter.navigate "tag/#{res.body[0]}"
 	Backbone.history.start()

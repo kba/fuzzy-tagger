@@ -12,13 +12,15 @@ module.exports = class FileModel extends Backbone.Model
 	}
 
 	addTag : (tag) ->
+		# console.log tag
 		self = @
 		Request
 			.patch("/api/file/#{self.get 'filename'}")
-			.send([
-				op: 'add'
-				path: '/tags/-'
-				value: tag
-			]).end (err, res) ->
-				console.log res
+			.send(
+				[
+					op: 'add'
+					path: '/tags/-'
+					value: tag
+				]
+			).end (err, res) ->
 				self.fetch()

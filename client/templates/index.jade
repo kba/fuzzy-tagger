@@ -1,0 +1,38 @@
+//- vim: ft=jade sw=4 ts=4 noexpandtab list :
+extends ./layout.jade
+
+block navbar
+	ul.navbar-nav.nav
+		li 
+			a foo
+
+block body
+	.row
+		#navigation.col-sm-12
+	.row(style="min-height: 200px")
+		#tags.col-sm-2
+			.panel.panel-default
+				.panel-heading Tags Given
+				.panel-body
+					ul#tag-list.list-inline
+		.col-sm-8
+			.panel.panel-default
+				.panel-heading Tags Given
+				.panel-body
+					#main
+		#tag-list-container.col-sm-2
+			.panel.panel-default
+				.panel-heading All Tags
+				.panel-body
+					ul#tag-complete-list.list-inline(tabindex=-1)
+	.clearfix.visible-xs-block
+	.row
+		div.col-sm-10
+			nav.navbar.navbar-inverse.navbar-fixed-top
+				.container
+					.navbar-footer
+						a.navbar-brand(href="#") Tagger
+						#input.navbar.navbar-fixed-bottom(tabindex=-1)
+							form#tagInputForm.form-group.form-group-lg
+								label(for="tagInput") > Enter Tag
+								input#tagInput.form-control(type='text').col-sm8

@@ -9,7 +9,7 @@ module.exports = class TaggingServer
 
 	setupExpress : () ->
 		self = @
-		@app.set('views', './templates')
+		@app.set('views', './client/templates')
 		@app.set('view engine', 'jade')
 
 		@app.use(Express.static('public'))
@@ -39,35 +39,40 @@ module.exports = class TaggingServer
 			res.send ret
 
 		@app.get '/api/file', (req, res, next) ->
-			res.send Object.keys self.files
+			self.db.find {}, (err, docs) ->
+				res.send docs.map (el) -> el._id
 
 		@app.get /\/api\/file\/(.*)/, (req, res, next) ->
 			filename = req.params[0]
-			if filename not of self.files
-				res.status 404
-				return next "No such file: #{filename}"
-			ret = JSON.parse JSON.stringify self.files[filename]
-			ret.tags = ret.tags.map (el) -> {html: el, tag: el}
-			res.send ret
+			self.db.findOne {_id: filename}, (err, found) ->
+				if err or not found
+					res.status 404
+					return next "No such file: #{filename}"
+				ret = JSON.parse JSON.stringify found
+				ret.tags = ret.tags.map (el) -> {html: el, tag: el}
+				res.send ret
 
 		@app.patch /\/api\/file\/(.*)/, (req, res, next) ->
 			filename = req.params[0]
-			if filename not of self.files
-				res.status 404
-				return next "No such file: #{filename}"
-			patchset = req.body
-			JsonPatch.apply(self.files[filename], patchset)
-			for patch in patchset
-				if patch.op is 'add'
-					if patch.value not in self.taglist
-						self.taglist.push patch.value
-			res.status 204
-			res.end()
+			self.db.findOne {_id: filename}, (err, found) ->
+				if err or not found
+					res.status 404
+					return next "No such file: #{filename}"
+				patchset = req.body
+				console.log patchset
+				JsonPatch.apply(self.files[filename], patchset)
+				for patch in patchset
+					if patch.op is 'add'
+						if patch.value not in self.taglist
+							self.taglist.push patch.value
+				self.db.update {_id: filename}, self.files[filename], (err, newDoc) ->
+					console.log newDoc
+				res.status 204
+				res.end()
 
-	constructor : (@files, @taglist) ->
+	constructor : (@files, @taglist, @db) ->
 		@files or= {}
 		@taglist or= []
-		# @db = @files.map{
 		@app = Express()
 		@setupExpress()
 

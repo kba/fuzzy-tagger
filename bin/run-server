@@ -5,6 +5,7 @@ Async = require 'async'
 Fs = require 'fs'
 Path = require 'path'
 TaggingServer = require '../src/TaggingServer'
+Nedb = require 'nedb'
 
 taglist = CSON.load 'data/tags.cson'
 
@@ -19,7 +20,13 @@ for i in [0 ... filenames.length]
 	files[filenames[i]].prev = filenames[i - 1] || null
 	files[filenames[i]].next = filenames[i + 1] || null
 
-srv = new TaggingServer(files, taglist)
-srv.listen 3000
+db = new Nedb(filename: 'db.json')
+db.loadDatabase (err) ->
+	Async.each Object.keys(files), (filename, cb) ->
+		files[filename]._id = filename
+		db.insert files[filename], cb
+	, (err) ->
+		srv = new TaggingServer(files, taglist, db)
+		srv.listen 3000
 
 # vim: ft=coffee :
