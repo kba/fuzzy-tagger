@@ -20,23 +20,28 @@ module.exports = class TaggingServer
 
 		@app.get /^\/file\/(.*)/, (req, res, next) ->
 			filename = req.params[0]
-			if filename not of self.files
-				res.status 404
-				return next "No such file: #{filename}"
-			res.header 'Content-Type', 'image/png'
-			Fs.readFile filename, (err, data) ->
-				res.send data
+			self.db.files.find {_id: filename}, (err, found) ->
+				if not found
+					res.status 404
+					return next "No such file: #{filename}"
+				res.header 'Content-Type', 'image/png'
+				Fs.readFile filename, (err, data) ->
+					res.send data
 
 		@app.get '/api/tags', (req, res, next) ->
 			filter = req.query.filter
-			ret = self.taglist.map (el) -> { html: el, tag: el }
-			fuzzyOpts = {
-				pre: '<b>'
-				post: '</b>'
-			}
-			if filter
-				ret = Fuzzy.filter(filter, self.taglist, fuzzyOpts).map (el) -> { html: el.string, tag: el.original }
-			res.send ret
+			console.log 'yay'
+			self.db.tags.find {}, (err, docs) ->
+				console.log err
+				console.log docs
+				ret = tagDocs.map (el) -> el._id
+				if filter
+					fuzzyOpts = {
+						pre: '<b>'
+						post: '</b>'
+					}
+					ret = Fuzzy.filter(filter, ret, fuzzyOpts).map (el) -> { html: el.string, tag: el.original }
+				res.send ret
 
 		@app.get '/api/file', (req, res, next) ->
 			self.db.files.find {}, (err, docs) ->
@@ -70,9 +75,7 @@ module.exports = class TaggingServer
 				res.status 204
 				res.end()
 
-	constructor : (@files, @taglist, @db) ->
-		@files or= {}
-		@taglist or= []
+	constructor : (@db) ->
 		@app = Express()
 		@setupExpress()
 

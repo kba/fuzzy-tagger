@@ -31,3 +31,5 @@ apidocs/
 lib/
 public/vendor
 db.json
+*.db.json
+
